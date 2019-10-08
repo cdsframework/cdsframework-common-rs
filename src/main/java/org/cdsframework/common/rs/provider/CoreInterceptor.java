@@ -70,8 +70,13 @@ public class CoreInterceptor implements ReaderInterceptor, WriterInterceptor {
         // If so, the response is gzipped and return with content-encoding for the caller to unzip
         //
         String acceptEncoding = httpServletRequest.getHeader(ACCEPT_ENCODING);
-//        logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        if (logger.isDebugEnabled()) {
+            logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        }
         if (acceptEncoding != null && acceptEncoding.contains(GZIP)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(METHODNAME, "setOutputStream contains GZIP");
+            }
             final OutputStream outputStream = writerInterceptorContext.getOutputStream();
             writerInterceptorContext.setOutputStream(new GZIPOutputStream(outputStream));
             writerInterceptorContext.getHeaders().putSingle(CONTENT_ENCODING, GZIP); 
@@ -83,15 +88,18 @@ public class CoreInterceptor implements ReaderInterceptor, WriterInterceptor {
     public Object aroundReadFrom(ReaderInterceptorContext readerInterceptorContext) throws IOException, WebApplicationException {
         final String METHODNAME = "aroundReadFrom ";
         
-//        List<String> contentEncoding = readerInterceptorContext.getHeaders().get("Content-Encoding");
-//        logger.debug(METHODNAME, "contentEncoding=", contentEncoding);
+        List<String> contentEncoding = readerInterceptorContext.getHeaders().get(CONTENT_ENCODING);
         List<String> acceptEncoding = readerInterceptorContext.getHeaders().get(ACCEPT_ENCODING);
-//        logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        if (logger.isDebugEnabled()) {
+            logger.debug(METHODNAME, "contentEncoding=", contentEncoding);
+            logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        }
 
         // If the request header indicates that context-encoding gziped, its decompressed
-        if (acceptEncoding != null && acceptEncoding.contains(GZIP)) {
-//            logger.debug(METHODNAME, "context decompressed");
-//            readerInterceptorContext.setInputStream(new GZIPInputStream(readerInterceptorContext.getInputStream()));
+        if (contentEncoding != null && contentEncoding.contains(GZIP)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(METHODNAME, "context decompressed");
+            }
             PushbackInputStream pushbackInputStream = new PushbackInputStream(readerInterceptorContext.getInputStream(), 2);
             byte [] signature = new byte[2];
             int len = pushbackInputStream.read( signature ); //read the signature

@@ -186,7 +186,7 @@ public class RSClient {
         coreJacksonJsonProvider = new CoreJacksonJsonProvider(jsonInclude);
         client.register(coreJacksonJsonProvider);
         if (gzipSupport) {
-            client.register(new EncodingFeature("gzip", GZipEncoder.class));
+            client.register(GZipEncoder.class);
             client.register(EncodingFilter.class);
             client.register(CoreRequestWriteInterceptor.class);
         }
