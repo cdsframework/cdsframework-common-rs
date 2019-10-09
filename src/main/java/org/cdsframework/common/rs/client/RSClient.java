@@ -47,7 +47,6 @@ import org.cdsframework.common.rs.provider.CoreRequestWriteInterceptor;
 import org.cdsframework.common.rs.support.CoreRsConstants;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.filter.EncodingFeature;
 import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.jackson.JacksonFeature;
