@@ -28,6 +28,7 @@ package org.cdsframework.common.rs.provider;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -35,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
+import static javax.ws.rs.core.HttpHeaders.ACCEPT_ENCODING;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_ENCODING;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.ReaderInterceptor;
 import javax.ws.rs.ext.ReaderInterceptorContext;
@@ -57,6 +60,7 @@ public class CoreInterceptor implements ReaderInterceptor, WriterInterceptor {
     @Context
     private HttpServletRequest httpServletRequest;
     
+    private static final String GZIP = "gzip";    
     @Override
     public void aroundWriteTo(WriterInterceptorContext writerInterceptorContext) throws IOException, WebApplicationException {
         final String METHODNAME = "aroundWriteTo ";
@@ -65,12 +69,17 @@ public class CoreInterceptor implements ReaderInterceptor, WriterInterceptor {
         // This checks the header to see if the requestor wants a gzipped response
         // If so, the response is gzipped and return with content-encoding for the caller to unzip
         //
-        String acceptEncoding = httpServletRequest.getHeader("accept-encoding");
-//        logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
-        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
+        String acceptEncoding = httpServletRequest.getHeader(ACCEPT_ENCODING);
+        if (logger.isDebugEnabled()) {
+            logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        }
+        if (acceptEncoding != null && acceptEncoding.contains(GZIP)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(METHODNAME, "setOutputStream contains GZIP");
+            }
             final OutputStream outputStream = writerInterceptorContext.getOutputStream();
             writerInterceptorContext.setOutputStream(new GZIPOutputStream(outputStream));
-            writerInterceptorContext.getHeaders().putSingle("Content-Encoding", "gzip"); 
+            writerInterceptorContext.getHeaders().putSingle(CONTENT_ENCODING, GZIP); 
         }
         writerInterceptorContext.proceed();
     }
@@ -79,15 +88,33 @@ public class CoreInterceptor implements ReaderInterceptor, WriterInterceptor {
     public Object aroundReadFrom(ReaderInterceptorContext readerInterceptorContext) throws IOException, WebApplicationException {
         final String METHODNAME = "aroundReadFrom ";
         
-//        List<String> contentEncoding = readerInterceptorContext.getHeaders().get("Content-Encoding");
-//        logger.debug(METHODNAME, "contentEncoding=", contentEncoding);
-        List<String> acceptEncoding = readerInterceptorContext.getHeaders().get("Accept-Encoding");
-//        logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        List<String> contentEncoding = readerInterceptorContext.getHeaders().get(CONTENT_ENCODING);
+        List<String> acceptEncoding = readerInterceptorContext.getHeaders().get(ACCEPT_ENCODING);
+        if (logger.isDebugEnabled()) {
+            logger.debug(METHODNAME, "contentEncoding=", contentEncoding);
+            logger.debug(METHODNAME, "acceptEncoding=", acceptEncoding);
+        }
 
         // If the request header indicates that context-encoding gziped, its decompressed
-        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
-//            logger.debug(METHODNAME, "context decompressed");
-            readerInterceptorContext.setInputStream(new GZIPInputStream(readerInterceptorContext.getInputStream()));
+        if (contentEncoding != null && contentEncoding.contains(GZIP)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(METHODNAME, "context decompressed");
+            }
+            PushbackInputStream pushbackInputStream = new PushbackInputStream(readerInterceptorContext.getInputStream(), 2);
+            byte [] signature = new byte[2];
+            int len = pushbackInputStream.read( signature ); //read the signature
+            pushbackInputStream.unread( signature, 0, len ); //push back the signature to the stream
+            if( signature[0] == (byte) 0x1f && signature[1] == (byte) 0x8b ) { //check if matches standard gzip magic number
+                if (logger.isDebugEnabled()) {
+                    logger.debug(METHODNAME, "decompressing content");
+                }
+                readerInterceptorContext.setInputStream(new GZIPInputStream(pushbackInputStream));
+            }
+            else {
+                logger.warn(METHODNAME, "content NOT GZIPPED, why?, treating as NOT GZIPPED");
+                readerInterceptorContext.setInputStream(pushbackInputStream);
+            }            
+
         }
 
         return readerInterceptorContext.proceed();

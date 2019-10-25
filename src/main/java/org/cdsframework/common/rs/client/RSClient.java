@@ -34,16 +34,20 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Variant;
 import org.cdsframework.common.rs.exception.mapper.ErrorException;
 import org.cdsframework.common.rs.exception.mapper.ErrorMessage;
 import org.cdsframework.common.rs.provider.CoreJacksonJsonProvider;
+import org.cdsframework.common.rs.provider.CoreRequestWriteInterceptor;
 import org.cdsframework.common.rs.support.CoreRsConstants;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.filter.EncodingFeature;
+import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.message.GZipEncoder;
@@ -64,6 +68,7 @@ public class RSClient {
     private static final Logger logger = Logger.getLogger(RSClient.class.getCanonicalName());
     private final boolean useResourceInPath;
     private CoreJacksonJsonProvider coreJacksonJsonProvider;
+    public final static String GZIP = "gzip";
             
 
     /**
@@ -176,10 +181,13 @@ public class RSClient {
         if (loggingFilter) {
             client.register(new LoggingFilter(logger, true));
         }
+        
         coreJacksonJsonProvider = new CoreJacksonJsonProvider(jsonInclude);
         client.register(coreJacksonJsonProvider);
         if (gzipSupport) {
-            client.register(new EncodingFeature("gzip", GZipEncoder.class));
+            client.register(GZipEncoder.class);
+            client.register(EncodingFilter.class);
+            client.register(CoreRequestWriteInterceptor.class);
         }
         client.register(new ApacheConnectorProvider());
         return client;
@@ -321,8 +329,12 @@ public class RSClient {
                 response = resource.request().get(Response.class);
             }
             else {
-                response = resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-                        .post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_JSON), Response.class);            
+//                response = resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+//                        .post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_JSON), Response.class);            
+
+                response = resource.request(MediaType.APPLICATION_JSON)
+                        .post(getEntity(requestEntity, MediaType.APPLICATION_JSON_TYPE), Response.class);            
+
             }
 
             // Check the status
@@ -345,6 +357,22 @@ public class RSClient {
         }
         return list;
     }        
+    
+
+    public boolean isGzipSupport() {
+        return gzipSupport;
+    }
+    
+    public Entity<Object> getEntity(Object requestEntity, MediaType mediaType) {
+        Entity<Object> entity = null;
+        if (isGzipSupport()) {
+            entity = Entity.entity(requestEntity, new Variant(mediaType, (String) null, GZIP));
+        }
+        else {
+            entity = Entity.entity(requestEntity, mediaType);
+        }
+        return entity;
+    }
     
     public static void throwException(ErrorMessage errorMessage) throws ErrorException {
         throw new ErrorException(errorMessage);
