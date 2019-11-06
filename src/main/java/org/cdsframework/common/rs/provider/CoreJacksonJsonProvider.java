@@ -53,7 +53,7 @@ public class CoreJacksonJsonProvider implements ContextResolver<ObjectMapper> {
 
     public CoreJacksonJsonProvider(JsonInclude.Include include) {
         final String METHODNAME = "constructor ";
-        logger.info(METHODNAME);
+        logger.debug(METHODNAME);
         defaultObjectMapper = createObjectMapper(include, null);
     }
     
@@ -64,7 +64,7 @@ public class CoreJacksonJsonProvider implements ContextResolver<ObjectMapper> {
 
     public static ObjectMapper createObjectMapper(JsonInclude.Include jsonInclude, String[] ignorableFields) {
         final String METHODNAME = "createObjectMapper ";
-        logger.info(METHODNAME, "creating objectMapper for ", CoreJacksonJsonProvider.class.getCanonicalName());
+        logger.debug(METHODNAME, "creating objectMapper for ", CoreJacksonJsonProvider.class.getCanonicalName());
 
         ObjectMapper objectMapper = new ObjectMapper();
         JacksonAnnotationIntrospector primaryIntrospector = new JacksonAnnotationIntrospector();
