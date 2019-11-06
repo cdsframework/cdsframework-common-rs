@@ -31,6 +31,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -265,11 +266,17 @@ public class RSClient {
         T returnType = null;
         // Check the status
         boolean success = (response.getStatus() == Response.Status.OK.getStatusCode());
-
+        
         if (!success) {
             // Caller not interested in the response, translate and throw
             if (responseType != Response.class) {
-                throwException(response.readEntity(ErrorMessage.class));
+                // If there is not content 204, return a null for now
+                if (response.getStatus() == Response.Status.NO_CONTENT.getStatusCode()) {
+                    return returnType;
+                }
+                else {
+                    throwException(response.readEntity(ErrorMessage.class));
+                }
             }
         }
 
@@ -321,7 +328,6 @@ public class RSClient {
     
     private <T> List<T> getList(WebTarget resource, Object requestEntity, GenericType genericType) throws ErrorException {
         final String METHODNAME = "getList ";
-        logger.info(METHODNAME);
         Response response = null;
         List<T> list = null;
         try {
