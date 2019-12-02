@@ -46,6 +46,7 @@ import org.cdsframework.common.rs.exception.mapper.ErrorMessage;
 import org.cdsframework.common.rs.provider.CoreJacksonJsonProvider;
 import org.cdsframework.common.rs.provider.CoreRequestWriteInterceptor;
 import org.cdsframework.common.rs.support.CoreRsConstants;
+import org.cdsframework.common.util.StringUtils;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.filter.EncodingFilter;
@@ -127,6 +128,10 @@ public class RSClient {
      * @param jsonInclude default is NON_NULL, used to exclude NULLs in json string
      */
     public RSClient(String baseURI, String rootPath, boolean loggingFilter, boolean useResourceInPath, boolean gzipSupport, JsonInclude.Include jsonInclude) {
+        if (StringUtils.isEmpty(baseURI)) {
+            throw new IllegalArgumentException("baseURI is required!");
+        }
+
         this.useResourceInPath = useResourceInPath;
         this.loggingFilter = loggingFilter;
         this.gzipSupport = gzipSupport;
