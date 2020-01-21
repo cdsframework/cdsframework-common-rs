@@ -31,6 +31,7 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import org.cdsframework.common.rs.support.CoreConfiguration;
+import org.cdsframework.common.util.StringUtils;
 
 /**
  *
