@@ -30,6 +30,8 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
+import org.cdsframework.common.rs.support.CoreConfiguration;
+import org.cdsframework.common.util.StringUtils;
 
 /**
  *
@@ -43,12 +45,14 @@ public class CORSResponseFilter implements ContainerResponseFilter {
 
         MultivaluedMap<String, Object> headers = responseContext.getHeaders();
 
+        //
         // We can add whats necessary to only allow specific urls
-        // For now its open
+        // For now its open, add configuration
         // headers.add("Access-Control-Allow-Origin", "http://myurl.org"); 
-        headers.add("Access-Control-Allow-Origin", "*");
+        headers.add("Access-Control-Allow-Origin", CoreConfiguration.getAccessControlAllowOrigin());
         headers.add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-        headers.add("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
+        //headers.add("access-control-allow-headers", "content-type, acccept, access-control-allow-origin, access-control-allow-methods, authorization, x-requested-with");
+        headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Authorization, X-Requested-With");        
         headers.add("Cache-control", "no-cache");
         headers.add("Cache-control", "no-store");        
         headers.add("Pragma", "no-cache");                

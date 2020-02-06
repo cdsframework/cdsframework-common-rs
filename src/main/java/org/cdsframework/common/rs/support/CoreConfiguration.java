@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Properties;
 import org.cdsframework.common.enumeration.Environment;
 import org.cdsframework.common.util.ConfigurationProperties;
+import org.cdsframework.common.util.StringUtils;
 import org.cdsframework.util.LogUtils;
 
 
@@ -52,6 +53,7 @@ public class CoreConfiguration {
     private static final boolean GZIP_SUPPORT;
     private static final boolean LOGGING_FILTER;
     private static final boolean GENERIC_EXCEPTION_MAPPER;
+    private static final String ACCESS_CONTROL_ALLOW_ORIGIN;
     
     static {
         final String METHODNAME = "CoreConfiguration static contructor ";
@@ -78,7 +80,7 @@ public class CoreConfiguration {
         GZIP_SUPPORT = Boolean.parseBoolean(INSTANCE_PROPERTIES.getProperty("GZIP_SUPPORT", "true"));
         LOGGING_FILTER = Boolean.parseBoolean(INSTANCE_PROPERTIES.getProperty("LOGGING_FILTER", "true"));
         GENERIC_EXCEPTION_MAPPER = Boolean.parseBoolean(INSTANCE_PROPERTIES.getProperty("GENERIC_EXCEPTION_MAPPER", "true"));
-
+        ACCESS_CONTROL_ALLOW_ORIGIN = INSTANCE_PROPERTIES.getProperty("ACCESS_CONTROL_ALLOW_ORIGIN");
         logger.info(METHODNAME, "EJB_HOST=", EJB_HOST);
         logger.info(METHODNAME, "EJB_PORT=", EJB_PORT);
         logger.info(METHODNAME, "EJB_JNDI_ROOT=", EJB_JNDI_ROOT);
@@ -89,6 +91,7 @@ public class CoreConfiguration {
         logger.info(METHODNAME, "LOGGING_FILTER=", LOGGING_FILTER);
         logger.info(METHODNAME, "GZIP_SUPPORT=", GZIP_SUPPORT);
         logger.info(METHODNAME, "GENERIC_EXCEPTION_MAPPER=", GENERIC_EXCEPTION_MAPPER);        
+        logger.info(METHODNAME, "ACCESS_CONTROL_ALLOW_ORIGIN=", ACCESS_CONTROL_ALLOW_ORIGIN);                
     }
 
     public static boolean isReturnStackTrace() {
@@ -133,6 +136,10 @@ public class CoreConfiguration {
     
     public static Properties getInstanceProperties() {
         return INSTANCE_PROPERTIES;
+    }
+
+    public static String getAccessControlAllowOrigin() {
+        return ACCESS_CONTROL_ALLOW_ORIGIN;
     }
     
 

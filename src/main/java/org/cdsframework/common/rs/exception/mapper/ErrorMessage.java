@@ -69,7 +69,12 @@ public final class ErrorMessage implements Serializable {
                 message = rootCause.getMessage();
             }
             else {
-                message += " rootCause: " + rootCause.getMessage();
+                if (!StringUtils.isEmpty(rootCause.getMessage())) {
+                    if (!StringUtils.isEmpty(message) && !message.trim().equalsIgnoreCase(rootCause.getMessage().trim())) {
+                        logger.info(METHODNAME, "appending rootCause ", rootCause.getMessage());
+                        message += " rootCause: " + rootCause.getMessage();
+                    }
+                }
             }
             setExceptionMessage(message);
         }

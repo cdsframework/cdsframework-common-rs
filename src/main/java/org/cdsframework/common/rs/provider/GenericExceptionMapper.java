@@ -63,23 +63,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
             if (ex.getCause() != null) {
                 cause = ex.getCause();
             }
-//            if (!(ex instanceof NotFoundException)) {
-//                // Log general error message
-//                logger.error(METHODNAME, "An ", cause.getClass().getCanonicalName(), 
-//                    " has occurred; Message: ", cause.getMessage());
-//            }
         }
         
-//        if (ex instanceof AuthenticationException) {
-//            errorMessage.setStatus(Response.Status.UNAUTHORIZED.getStatusCode());
-//        } else if (ex instanceof AuthorizationException) {
-//            errorMessage.setStatus(Response.Status.FORBIDDEN.getStatusCode());
-//        } else if (ex instanceof ConstraintViolationException) {
-//            errorMessage.setStatus(Response.Status.CONFLICT.getStatusCode());
-//        } else if (ex instanceof NotFoundException) {
-//            errorMessage.setStatus(Response.Status.NOT_FOUND.getStatusCode());
-//        } else if (ex instanceof ValidationException) {
-//            errorMessage.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+
         if (ex instanceof ClientErrorException) {
             ClientErrorException clientErrorException = (ClientErrorException) ex;
             errorMessage.setStatus(clientErrorException.getResponse().getStatus());
