@@ -32,8 +32,8 @@ import org.cdsframework.common.rs.provider.GenericExceptionMapper;
 import org.cdsframework.common.rs.support.CoreConfiguration;
 import org.cdsframework.util.LogUtils;
 import org.glassfish.jersey.client.filter.EncodingFilter;
-import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -56,7 +56,7 @@ public class BaseResourceConfig extends ResourceConfig {
         }
         
         if (CoreConfiguration.isLoggingFilter()) {
-            register(LoggingFilter.class);
+            register(LoggingFeature.class);
             register(CoreLoggingFilter.class);
         }
         if (CoreConfiguration.isGzipSupport()) {

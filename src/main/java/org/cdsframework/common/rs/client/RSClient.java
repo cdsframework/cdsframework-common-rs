@@ -50,8 +50,9 @@ import org.cdsframework.common.util.StringUtils;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.filter.EncodingFilter;
-import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.glassfish.jersey.message.GZipEncoder;
 
 /**
@@ -185,7 +186,7 @@ public class RSClient {
         Client client = ClientBuilder.newClient()
                 .register(new JacksonFeature());
         if (loggingFilter) {
-            client.register(new LoggingFilter(logger, true));
+            client.register(new LoggingFeature(logger, Level.INFO, Verbosity.PAYLOAD_ANY, 10000));
         }
         
         coreJacksonJsonProvider = new CoreJacksonJsonProvider(jsonInclude);
@@ -393,3 +394,4 @@ public class RSClient {
         return coreJacksonJsonProvider;
     }
 }
+
